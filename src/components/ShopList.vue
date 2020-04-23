@@ -8,12 +8,16 @@
       <li class="product-list__item"
         v-for="item in items"
         :key="item.name"
-        @click="updateBasket($event, item)"
         v-bind:class="{expensive: wallet < item.price, added: item.added}">
-        <span class="item-name">{{ item.name }}</span>
-        <span class="item-price">{{ item.price | currency}}</span>
+        <div @click="updateBasket($event, item)">
+          <span class="item-name">{{ item.name }}</span>
+          <span class="item-price">{{ item.price | currency}}</span>
+        </div>
+        <span class="remove" @click="removeItem(item.name)">x</span>
       </li>
-      <p class="error" v-if="toExpensive">You don't have enough money to buy <span class="item">{{ currentItemName }}</span></p>
+      <transition name="slide">
+        <p class="error" v-if="toExpensive">You don't have enough money to buy <span class="item">{{ currentItemName }}</span></p>
+      </transition>
       <h2>Your basket: {{ sum | currency }}</h2>
     </ul>
   </div>
@@ -32,7 +36,7 @@ export default {
       wallet: 100,
       basket: [],
       sum: 0,
-      toExpensive: 0,
+      toExpensive: false,
       currentItemName: '',
       items: [
         {name: 'Apples', price: 5.0},
@@ -68,6 +72,11 @@ export default {
     },
     updateItems: function(newItem) {
       this.items.push(newItem)
+    },
+    removeItem: function(itemName) {
+      const item = this.items.find(el => el.name === itemName)
+      const itemIndex = this.items.indexOf(item)
+      this.items.splice(itemIndex, 1)
     }
   },
   filters: {
@@ -113,9 +122,7 @@ export default {
     background-color: var(--cyan);
     border-radius: var(--border-radius);
     &__item {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem;
+      position: relative;
       margin: .75rem 0;
       font-size: 1.25rem;
       background-color: var(--lapis-lazuli);
@@ -123,6 +130,11 @@ export default {
       border-radius: var(--border-radius);
       cursor: pointer;
       transition: background-color linear .2s, color linear .4s;
+      div {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+      }
       &.expensive {
         background-color: var(--flame);
         cursor: not-allowed;
@@ -134,6 +146,26 @@ export default {
       }
       .item-price {
         font-weight: bold;
+      }
+      .remove {
+        position: absolute;
+        display: inline-block;
+        width: 0;
+        left: 100%;
+        top: 16px;
+        overflow: hidden;
+        background-color: var(--flame);
+        color: var(--white);
+        border-top-right-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+        transition: width linear .2s;
+      }
+      &:not(.added) {
+        &:hover {
+          .remove {
+            width: 30px;
+          }
+        }
       }
     }
   }
@@ -151,6 +183,18 @@ export default {
       background-color: var(--white);
       color: var(--flame);
       border-radius: var(--border-radius);
+    }
+  }
+
+  .slide {
+    &-enter,
+    &-leave-to {
+      opacity: 0;
+      margin-top: -50px;
+    }
+    &-enter-active,
+    &-leave-active {
+      transition: all linear .25s;
     }
   }
 </style>

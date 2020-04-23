@@ -3,8 +3,12 @@
     <input type="text" v-model="item.name" placeholder="Name">
     <input type="number" v-model="item.price" placeholder="price">
     <button type="button" class="btn" @click="addNewItem">Add</button>
-    <p class="error" v-if="error">Wrong item! At least 3 signs and price greater than 0.</p>
-    <p class="error" v-if="duplicate">This item already exists on the list.</p>
+    <transition name="slide">
+      <p class="error" v-if="error">Wrong item! At least 3 signs and price greater than 0.</p>
+    </transition>
+    <transition name="slide">
+      <p class="error" v-if="duplicate">This item already exists on the list.</p>
+    </transition>
   </div>
 </template>
 
@@ -26,6 +30,8 @@ export default {
     addNewItem: function() {
       this.error = false // In case that previously user tried to add wrong item.
       this.duplicate = false
+      this.item.name = this.item.name.charAt(0).toUpperCase() + this.item.name.slice(1)
+
       const itemExists = this.currentItems.find(el => el.name === this.item.name)
       if(itemExists) {
         this.duplicate = true
