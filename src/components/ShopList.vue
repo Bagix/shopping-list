@@ -1,29 +1,36 @@
 <template>
   <div class="container">
-  <ul class="product-list">
-    <h2>You have: {{ wallet | currency }}</h2>
-    <li class="product-list__item"
-      v-for="item in items"
-      :key="item.name"
-      @click="updateBasket($event, item)"
-      v-bind:class="{expensive: wallet < item.price}">
-      <span class="item-name">{{ item.name }}</span>
-      <span class="item-price">{{ item.price | currency }}</span>
-    </li>
-    <p class="error" v-if="toExpensive">You don't have enough money to buy <span class="item">{{ currentItemName }}</span></p>
-    <h2>Your basket: {{ sum | currency }}</h2>
-  </ul>
+    <add-item
+    :currentItems="items"
+    @addNewItem="updateItems"/>
+    <ul class="product-list">
+      <h2>You have: {{ wallet | currency }}</h2>
+      <li class="product-list__item"
+        v-for="item in items"
+        :key="item.name"
+        @click="updateBasket($event, item)"
+        v-bind:class="{expensive: wallet < item.price, added: item.added}">
+        <span class="item-name">{{ item.name }}</span>
+        <span class="item-price">{{ item.price | currency}}</span>
+      </li>
+      <p class="error" v-if="toExpensive">You don't have enough money to buy <span class="item">{{ currentItemName }}</span></p>
+      <h2>Your basket: {{ sum | currency }}</h2>
+    </ul>
   </div>
 </template>
 
 <script>
+import AddItem from '@/components/AddItem.vue'
+
 export default {
   name: 'ShopList',
+  components: {
+    'add-item': AddItem
+  },
   data() {
     return {
       wallet: 100,
-      basket: [
-      ],
+      basket: [],
       sum: 0,
       toExpensive: 0,
       currentItemName: '',
@@ -32,31 +39,35 @@ export default {
         {name: 'Shoes', price: 250.5},
         {name: 'Pants', price: 48.0},
         {name: 'Tomatos', price: 3.48},
-        {name: 'Milk', price: 2.75}
+        {name: 'Milk', price: 2.75},
+        {name: 'Flowers', price: 50.75}
       ]
     }
   },
   methods: {
     updateBasket: function(event, item) {
-      const el = event.target
-      const itemIndex = this.basket.indexOf(item)
-      if(item.price <= this.wallet && itemIndex < 0) {
-        this.toExpensive = false
+      const basketIndex = this.basket.indexOf(item)
+      const listIndex = this.items.indexOf(item)
+
+      this.toExpensive = false
+
+      if(item.price <= this.wallet && basketIndex < 0) {
         this.basket.push(item)
         this.wallet -= item.price
         this.sum += item.price
-        el.classList.remove('expensive')
-        el.classList.add('added')
-      } else if(itemIndex > -1) {
-        this.toExpensive = false
-        this.basket.splice(itemIndex, 1)
-        el.classList.remove('added')
+        this.items[listIndex].added = true
+      } else if(basketIndex > -1) {
+        this.basket.splice(basketIndex, 1)
         this.wallet += item.price
         this.sum -= item.price
+        this.items[listIndex].added = false
       } else {
         this.toExpensive = true
         this.currentItemName = item.name
       }
+    },
+    updateItems: function(newItem) {
+      this.items.push(newItem)
     }
   },
   filters: {
@@ -69,6 +80,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   :root {
     --flame: #e4572e;
     --cyan: #30bced;
@@ -90,7 +106,7 @@ export default {
   }
 
   .product-list {
-    width: 400px;
+    width: 500px;
     list-style: none;
     margin: 0 auto;
     padding: 1rem 2rem;
@@ -100,36 +116,41 @@ export default {
       display: flex;
       justify-content: space-between;
       padding: 1rem;
-      margin: .75rem;
+      margin: .75rem 0;
       font-size: 1.25rem;
       background-color: var(--lapis-lazuli);
       color: var(--white);
       border-radius: var(--border-radius);
       cursor: pointer;
-      &.added {
-        background-color: var(--android-green);
-        color: var(--dark-jungle-green);
-      }
+      transition: background-color linear .2s, color linear .4s;
       &.expensive {
         background-color: var(--flame);
         cursor: not-allowed;
+      }
+      &.added {
+        background-color: var(--android-green);
+        color: var(--dark-jungle-green);
+        cursor: pointer;
       }
       .item-price {
         font-weight: bold;
       }
     }
-
-    .error {
+  }
+  .error {
+    background-color: var(--flame);
+    color: var(--white);
+    margin: 1rem auto;
+    padding: .5rem .75rem;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    max-width: 90%;
+    .item {
+      display: inline-block;
+      padding: .33rem;
+      background-color: var(--white);
       color: var(--flame);
-      font-weight: bold;
-      font-size: 1rem;
-      .item {
-        display: inline-block;
-        padding: .33rem;
-        background-color: var(--flame);
-        color: var(--white);
-        border-radius: var(--border-radius);
-      }
+      border-radius: var(--border-radius);
     }
   }
 </style>
