@@ -60,7 +60,7 @@ export default {
         this.wallet -= item.price
         this.sum += item.price
         this.items[listIndex].added = true
-      } else if(basketIndex > -1) {
+      } else if(basketIndex !== -1) {
         this.basket.splice(basketIndex, 1)
         this.wallet += item.price
         this.sum -= item.price

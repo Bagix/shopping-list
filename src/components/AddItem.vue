@@ -30,6 +30,7 @@ export default {
     addNewItem: function() {
       this.error = false // In case that previously user tried to add wrong item.
       this.duplicate = false
+      this.item.name = this.item.name.trim()
       this.item.name = this.item.name.charAt(0).toUpperCase() + this.item.name.slice(1)
 
       const itemExists = this.currentItems.find(el => el.name === this.item.name)
