@@ -54,24 +54,54 @@ export default {
       const listIndex = this.items.indexOf(item)
 
       this.toExpensive = false
+      let target = 0
 
-      if(item.price <= this.wallet && basketIndex < 0) {
+      if(item.price <= this.wallet && basketIndex < 0) { // Add to basket.
         this.basket.push(item)
         this.wallet -= item.price
-        this.sum += item.price
+        target = this.sum + item.price
+        this.updateSumUp(target)
         this.items[listIndex].added = true
-      } else if(basketIndex !== -1) {
+      } else if(basketIndex !== -1) { // Remove from basket.
         this.basket.splice(basketIndex, 1)
         this.wallet += item.price
-        this.sum -= item.price
+        target = this.sum - item.price
+        this.updateSumDown(target)
         this.items[listIndex].added = false
-      } else {
+      } else { // Can't add to basket.
         this.toExpensive = true
         this.currentItemName = item.name
       }
     },
     updateItems: function(newItem) {
       this.items.push(newItem)
+    },
+    updateSumUp: function(target) {
+      const speed = 150
+      const increase = target / speed
+      console.log(target + ' - ' + increase)
+
+      if(this.sum < target) {
+        this.sum += increase
+        setTimeout(() => this.updateSumUp(target), 1)
+      } else {
+        this.sum = target
+      }
+    },
+    updateSumDown: function(target) {
+      const speed = 150
+      let decrease = 0.3
+
+      if(target > 0) {
+        decrease = target / speed
+      }
+
+      if(this.sum > target) {
+        this.sum -= decrease
+        setTimeout(() => this.updateSumDown(target), 1)
+      } else {
+        this.sum = target
+      }
     },
     removeItem: function(itemName) {
       const item = this.items.find(el => el.name === itemName)
