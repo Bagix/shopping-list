@@ -41,6 +41,10 @@ export default {
       if(this.item.name.length > 2 && this.item.price > 0) {
         this.item.price = Number(this.item.price) // Received String but need Number to display price in proper format.
         this.$emit('addNewItem', this.item)
+        setTimeout(() => {
+          this.item.name = ''
+          this.item.price = ''
+        }, 100)
       } else {
         this.error = true
       }

@@ -127,7 +127,7 @@ export default {
       if(target > 0) {
         decrease = target / speed
       }
-      console.log(target)
+
       if(this.wallet > target) {
         this.wallet -= decrease
         setTimeout(() => this.updateWalletDown(target), 1)
