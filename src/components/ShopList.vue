@@ -54,19 +54,22 @@ export default {
       const listIndex = this.items.indexOf(item)
 
       this.toExpensive = false
-      let target = 0
+      let targetSum = this.sum
+      let targetWallet = this.wallet
 
       if(item.price <= this.wallet && basketIndex < 0) { // Add to basket.
         this.basket.push(item)
-        this.wallet -= item.price
-        target = this.sum + item.price
-        this.updateSumUp(target)
+        targetWallet -= item.price
+        targetSum += item.price
+        this.updateSumUp(targetSum)
+        this.updateWalletDown(targetWallet)
         this.items[listIndex].added = true
       } else if(basketIndex !== -1) { // Remove from basket.
         this.basket.splice(basketIndex, 1)
-        this.wallet += item.price
-        target = this.sum - item.price
-        this.updateSumDown(target)
+        targetWallet += item.price
+        targetSum -= item.price
+        this.updateSumDown(targetSum)
+        this.updateWalletUp(targetWallet)
         this.items[listIndex].added = false
       } else { // Can't add to basket.
         this.toExpensive = true
@@ -76,10 +79,10 @@ export default {
     updateItems: function(newItem) {
       this.items.push(newItem)
     },
-    updateSumUp: function(target) {
+    updateSumUp: function(targetNumber) {
+      const target = Math.round(targetNumber * 100) / 100
       const speed = 150
       const increase = target / speed
-      console.log(target + ' - ' + increase)
 
       if(this.sum < target) {
         this.sum += increase
@@ -88,9 +91,22 @@ export default {
         this.sum = target
       }
     },
-    updateSumDown: function(target) {
+    updateWalletUp: function(targetNumber) {
+      const target = Math.round(targetNumber * 100) / 100
       const speed = 150
-      let decrease = 0.3
+      const increase = target / speed
+
+      if(this.wallet < target) {
+        this.wallet += increase
+        setTimeout(() => this.updateWalletUp(target), 1)
+      } else {
+        this.wallet = target
+      }
+    },
+    updateSumDown: function(targetNumber) {
+      const target = Math.round(targetNumber * 100) / 100
+      const speed = 20
+      let decrease = 0.35
 
       if(target > 0) {
         decrease = target / speed
@@ -101,6 +117,22 @@ export default {
         setTimeout(() => this.updateSumDown(target), 1)
       } else {
         this.sum = target
+      }
+    },
+    updateWalletDown: function(targetNumber) {
+      const target = Math.round(targetNumber * 100) / 100
+      const speed = 20
+      let decrease = 0.35
+
+      if(target > 0) {
+        decrease = target / speed
+      }
+      console.log(target)
+      if(this.wallet > target) {
+        this.wallet -= decrease
+        setTimeout(() => this.updateWalletDown(target), 1)
+      } else {
+        this.wallet = target
       }
     },
     removeItem: function(itemName) {
@@ -188,6 +220,7 @@ export default {
         color: var(--white);
         border-top-right-radius: var(--border-radius);
         border-bottom-right-radius: var(--border-radius);
+        cursor: pointer;
         transition: width linear .2s;
       }
       &:not(.added) {
